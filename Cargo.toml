@@ -1,0 +1,15 @@
+[package]
+name = "kala"
+version = "0.1.0"
+edition = "2024"
+
+
+[features]
+default = []
+# Enables experimental APIs.
+#
+# Requires nightly Rust.
+experimental = []
+
+[dependencies]
+set26 = "0.1.0"
