@@ -47,4 +47,23 @@ impl Color {
             self.alpha,
         )
     }
+
+    pub fn outf32(&self) -> (
+        [f32;3],
+        RgbChromaticities,
+        f32,
+    ) {
+        let f = self.inner.to_rgb();
+        let c = self.outer.chromaticity();
+
+        (
+            [
+                f.0 as f32,
+                f.1 as f32,
+                f.2 as f32,
+            ],
+            c,
+            self.alpha,
+        )
+    }
 }
