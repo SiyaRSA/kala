@@ -66,4 +66,14 @@ impl Color {
             self.alpha,
         )
     }
+
+    pub fn flatf32(&self) -> (f32, f32, f32, f32) {
+        let f = self.inner.to_rgb();
+        (
+            f.0 as f32,
+            f.1 as f32,
+            f.2 as f32,
+            self.alpha,
+        )
+    }
 }
