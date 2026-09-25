@@ -1,6 +1,7 @@
 // src/lib.rs
 #![cfg_attr(feature = "experimental", feature(f128))]
 mod composite;
+mod constant;
 mod format;
 mod color;
 mod map;

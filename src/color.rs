@@ -179,7 +179,7 @@ impl Default for Color {
     fn default() -> Self {
         Self { 
             inner: Format::RGBA { r: 0, g: 0, b: 0, a: 255 }, 
-            outer: Composite::Srgb,
+            outer: Composite::AcesAp0,
             alpha: 1.0,
         }
     }
