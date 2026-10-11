@@ -1,7 +1,7 @@
 // src/operations.rs
-/*use crate::color::Color;
+use crate::color::Color;
 
-impl Color {
+/*impl Color {
     /// Adjusts the lightness by a given amount (e.g., 0.1 for +10%).
     pub fn lighten(&self, amount: f32) -> Self {
         let (h, s, l, a) = self.to_hsla();
@@ -64,3 +64,11 @@ impl Color {
         Self::rgba(r, g, b, a)
     }
 }*/
+
+impl Color {
+    pub fn set_alpha(mut self, alpha: f32) -> Self {
+        self.alpha = alpha;
+
+        self
+    }
+}
