@@ -21,5 +21,5 @@ pub mod util {
 
 pub use composite::Composite;
 pub use format::Format;
-pub use color::Color;
+pub use color::{Color, ColorParseError};
 pub use map::MAP;

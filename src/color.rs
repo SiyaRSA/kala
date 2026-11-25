@@ -2,6 +2,27 @@
 use crate::format::Format;
 use crate::Composite;
 use set26::Seq;
+use std::str::FromStr;
+
+/// Errors that can occur when parsing a [`Color`] from a hexadecimal string.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ColorParseError {
+    InvalidLength,
+    InvalidHexDigit,
+}
+
+impl std::fmt::Display for ColorParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidLength => {
+                f.write_str("color hex string must contain 3, 4, 6, or 8 digits")
+            }
+            Self::InvalidHexDigit => f.write_str("color string contains an invalid hex digit"),
+        }
+    }
+}
+
+impl std::error::Error for ColorParseError {}
 
 /// # KALA
 /// ### [Color] S2FsYQ==
@@ -182,5 +203,79 @@ impl Default for Color {
             outer: Composite::AcesAp0,
             alpha: 1.0,
         }
+    }
+}
+
+impl FromStr for Color {
+    type Err = ColorParseError;
+
+    /// Parses a hex color string, with or without a leading `#`.
+    ///
+    /// Supports `RGB`, `RGBA`, `RRGGBB`, and `RRGGBBAA` forms.
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let value = value.strip_prefix('#').unwrap_or(value);
+        if !matches!(value.len(), 3 | 4 | 6 | 8) {
+            return Err(ColorParseError::InvalidLength);
+        }
+
+        if !value.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+            return Err(ColorParseError::InvalidHexDigit);
+        }
+
+        let expanded;
+        let value = if value.len() <= 4 {
+            expanded = value
+                .chars()
+                .flat_map(|digit| [digit, digit])
+                .collect::<String>();
+            expanded.as_str()
+        } else {
+            value
+        };
+
+        let hex = u32::from_str_radix(value, 16).map_err(|_| ColorParseError::InvalidHexDigit)?;
+        Ok(Self::hex(hex))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Color, ColorParseError};
+    use crate::format::Format;
+    use std::str::FromStr;
+
+    #[test]
+    fn parses_hex_colors_with_and_without_hash() {
+        assert_eq!(
+            Color::from_str("#abc").unwrap().inner,
+            Format::HEX(0xAABBCC)
+        );
+        assert_eq!(
+            Color::from_str("112233").unwrap().inner,
+            Format::HEX(0x112233)
+        );
+    }
+
+    #[test]
+    fn parses_alpha_hex_colors() {
+        let color = Color::from_str("#abcd").unwrap();
+        assert_eq!(color.inner, Format::HEX(0xAABBCC));
+        assert!((color.alpha - 0xDD as f32 / 255.0).abs() < f32::EPSILON);
+
+        let color = Color::from_str("#11223380").unwrap();
+        assert_eq!(color.inner, Format::HEX(0x112233));
+        assert!((color.alpha - 128.0 / 255.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn rejects_invalid_hex_length_and_digits() {
+        assert_eq!(
+            Color::from_str("#12").unwrap_err(),
+            ColorParseError::InvalidLength
+        );
+        assert_eq!(
+            Color::from_str("#ggg").unwrap_err(),
+            ColorParseError::InvalidHexDigit
+        );
     }
 }
